@@ -1,0 +1,23 @@
+# Render.com blueprint — Docker + persistent disk (session bachane ke liye)
+# Note: persistent disk Render ke paid plan mein hota hai. Free plan pe session
+# restart par mit sakti hai (dobara pair karna parega) aur service sleep hoti hai.
+services:
+  - type: web
+    name: golden-md
+    runtime: docker
+    plan: starter            # free pe disk nahi milti; starter (paid) recommended
+    envVars:
+      - key: PREFIX
+        value: "."
+      - key: BOT_NAME
+        value: "Golden MD"
+      - key: OWNER_NUMBER
+        sync: false          # Render dashboard mein apna number daalo
+      - key: PUBLIC_URL
+        sync: false          # misal: https://golden-md.onrender.com
+      - key: DATA_FILE
+        value: "/app/sessions/.data.json"   # settings bhi disk par, redeploy par na mitein
+    disk:
+      name: sessions
+      mountPath: /app/sessions
+      sizeGB: 1

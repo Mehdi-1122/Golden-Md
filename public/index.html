@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Golden MD — Connect</title>
+<style>
+  :root{ --gold:#FFD24A; --g1:#FFF6C0; --g2:#B8860B; --bg:#0c0f0d; --card:#141a16; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ min-height:100vh; font-family:system-ui,Segoe UI,Arial,sans-serif;
+    background:radial-gradient(circle at 50% 18%,#123,#0b1410 45%,#060807);
+    color:#eee; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .card{ width:100%; max-width:420px; background:var(--card); border-radius:22px; padding:30px 24px;
+    border:1px solid rgba(255,210,74,.25); box-shadow:0 20px 60px rgba(0,0,0,.5); }
+  .logo{ text-align:center; margin-bottom:8px; }
+  .logo .crown{ font-size:40px; }
+  .title{ text-align:center; font-size:30px; font-weight:800; letter-spacing:2px;
+    background:linear-gradient(180deg,var(--g1),var(--gold) 45%,var(--g2));
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub{ text-align:center; color:#8bbfa5; letter-spacing:3px; font-size:12px; margin-bottom:22px; }
+  label{ font-size:13px; color:#bbb; display:block; margin:0 0 8px 4px; }
+  input{ width:100%; padding:14px 16px; border-radius:12px; border:1px solid #2a332d;
+    background:#0e130f; color:#fff; font-size:16px; outline:none; }
+  input:focus{ border-color:var(--gold); }
+  .hint{ font-size:12px; color:#789; margin:8px 4px 18px; }
+  button{ width:100%; padding:15px; border:0; border-radius:12px; cursor:pointer; font-size:16px; font-weight:700;
+    background:linear-gradient(180deg,var(--g1),var(--gold) 45%,var(--g2)); color:#1a1200; }
+  button:disabled{ opacity:.6; cursor:not-allowed; }
+  .box{ margin-top:22px; display:none; }
+  .code{ font-size:34px; font-weight:800; letter-spacing:6px; text-align:center; color:var(--gold);
+    background:#0e130f; border:1px dashed var(--gold); border-radius:14px; padding:18px; }
+  .steps{ font-size:14px; color:#cfe; line-height:1.9; margin-top:16px; background:#101713; border-radius:12px; padding:14px 16px; }
+  .msg{ text-align:center; margin-top:14px; font-size:14px; min-height:20px; }
+  .ok{ color:#25D366; } .err{ color:#ff6b6b; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"><span class="crown">👑</span></div>
+    <div class="title">GOLDEN&nbsp;MD</div>
+    <div class="sub">WHATSAPP BOT • CONNECT</div>
+
+    <label>Apna WhatsApp number (country code ke saath)</label>
+    <input id="num" type="tel" placeholder="923001234567" inputmode="numeric">
+    <div class="hint">Misal: 92 Pakistan ke liye → 923001234567 ( + ya 0 nahi)</div>
+    <button id="btn" onclick="pair()">Get Pairing Code</button>
+
+    <div class="box" id="box">
+      <div class="code" id="code">••••••••</div>
+      <div class="steps">
+        1️⃣ WhatsApp kholo<br>
+        2️⃣ <b>Settings → Linked Devices</b><br>
+        3️⃣ <b>Link a Device → Link with phone number</b><br>
+        4️⃣ Ye code daal do — bot khud chal jayega ✅
+      </div>
+    </div>
+    <div class="msg" id="msg"></div>
+
+    <div class="box" id="sidbox">
+      <label>Aapka SESSION_ID (kahin bhi deploy ke liye)</label>
+      <div class="code" id="sid" style="font-size:13px;letter-spacing:0;word-break:break-all;text-align:left">—</div>
+      <button style="margin-top:10px" onclick="copySid()">📋 Copy SESSION_ID</button>
+      <div class="hint">Ise apni deploy ke <b>SESSION_ID</b> env mein daalo. Kisi ko mat dena 🔒</div>
+    </div>
+  </div>
+
+<script>
+let timer
+async function pair(){
+  const num = document.getElementById('num').value.replace(/\D/g,'')
+  const btn = document.getElementById('btn'), msg = document.getElementById('msg')
+  msg.className='msg'; msg.textContent=''
+  if(num.length < 10){ msg.className='msg err'; msg.textContent='Sahi number likhein.'; return }
+  btn.disabled=true; btn.textContent='Code le raha hai...'
+  try{
+    const r = await fetch('/pair',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({number:num})})
+    const j = await r.json()
+    if(j.already){ msg.className='msg ok'; msg.textContent='Ye number pehle se connected hai ✅'; btn.disabled=false; btn.textContent='Get Pairing Code'; return }
+    if(j.error){ throw new Error(j.error) }
+    document.getElementById('box').style.display='block'
+    document.getElementById('code').textContent = j.code
+    msg.className='msg'; msg.textContent='Code WhatsApp mein daalein...'
+    poll(num, j.token)
+  }catch(e){ msg.className='msg err'; msg.textContent = e.message }
+  btn.disabled=false; btn.textContent='Get Pairing Code'
+}
+function copySid(){
+  const t=document.getElementById('sid').textContent
+  navigator.clipboard?.writeText(t)
+  const m=document.getElementById('msg'); m.className='msg ok'; m.textContent='SESSION_ID copy ho gaya ✅'
+}
+function poll(num, token){
+  clearInterval(timer)
+  let tries = 0, afterConnect = 0
+  timer = setInterval(async ()=>{
+    if(++tries > 120){ clearInterval(timer); return }   // 6 minute baad band
+    try{
+      const r = await fetch('/status/'+num+'?token='+encodeURIComponent(token)); const j = await r.json()
+      if(j.connected){
+        const msg=document.getElementById('msg'); msg.className='msg ok'
+        msg.textContent='🎉 Connect ho gaya! Bot chal raha hai. WhatsApp pe .menu likhein.'
+        if(j.sessionId){ clearInterval(timer); document.getElementById('sidbox').style.display='block'
+          document.getElementById('sid').textContent=j.sessionId }
+        else if(++afterConnect > 5) clearInterval(timer) }
+    }catch{}
+  }, 3000)
+}
+</script>
+</body>
+</html>
