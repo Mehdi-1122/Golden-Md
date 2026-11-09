@@ -52,7 +52,7 @@ Naya command banane ke liye `plugins/` mein nayi file daal do, `npm start` dobar
   kisi ko promote/demote kare to bot change **wapas palat** deta hai aur us actor
   ko **khud bhi admin se hata** deta hai.
 - **`.gclock on`** — us group mein sirf bot owner hi commands chala sake.
-- **`.antidelete on`** — deleted messages wapas dikhaye.
+- **`.antidelete on`** — deleted messages wapas dikhaye. Group mein likho to us group ke liye; inbox mein owner likhe to saare inbox ke liye (wapas message owner ke "Message yourself" mein aata hai).
 - **`.antiviewonce on`** — view-once media khol de.
 - **`.antilink on`** — group mein WhatsApp links auto-delete.
 

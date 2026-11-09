@@ -12,7 +12,13 @@ export default [
   { name: 'antilink', category: 'safety', group: true, admin: true, desc: 'Links auto-delete', ...toggle('antilink', 'Antilink') },
   { name: 'welcome', category: 'safety', group: true, admin: true, desc: 'Welcome msg', ...toggle('welcome', 'Welcome') },
   { name: 'goodbye', aliases: ['bye'], category: 'safety', group: true, admin: true, desc: 'Goodbye msg', ...toggle('goodbye', 'Goodbye') },
-  { name: 'antidelete', aliases: ['antidel'], category: 'safety', group: true, admin: true, desc: 'Deleted msg wapas', ...toggle('antidelete', 'Anti-delete') },
+  { name: 'antidelete', aliases: ['antidel'], category: 'safety', admin: true, desc: 'Deleted msg wapas (group + inbox)',
+    run (ctx) {
+      if (ctx.isGroup) return toggleRun(ctx, { key: 'antidelete', label: 'Anti-delete' })
+      if (!ctx.isOwner) return ctx.reply('👑 Inbox ka anti-delete sirf owner badal sakta hai.')
+      return toggleRun(ctx, { key: 'antidelete', id: ctx.config.scope('inbox'), label: 'Inbox anti-delete', perm: 'owner',
+        on: '✅ Inbox anti-delete ON — koi bhi inbox mein message delete karega to wo aap ke "Message yourself" mein aa jayega.' })
+    } },
   { name: 'antiviewonce', aliases: ['antivo'], category: 'safety', group: true, admin: true, desc: 'View-once open', ...toggle('antiviewonce', 'Anti-viewonce') },
 
   // owner-lock: sirf bot owner commands chala sake is group mein

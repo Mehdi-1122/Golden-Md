@@ -1,14 +1,14 @@
 // View-once media ko normal media bana ke dobara bhejta hai (jab setting ON ho)
 import { downloadMediaMessage } from '@whiskeysockets/baileys'
+import { getType, viewOnceInner } from '../lib/helpers.js'
 
 export async function hook (ctx) {
   const { msg, from, sock, store } = ctx
   if (!store.is('antiviewonce', from) && !store.is('antiviewonce', ctx.config.scope('global'))) return
-  const vo = msg.message?.viewOnceMessageV2 || msg.message?.viewOnceMessage || msg.message?.viewOnceMessageV2Extension
-  if (!vo) return
-  const inner = vo.message || {}
-  const kind = Object.keys(inner)[0]            // imageMessage / videoMessage / audioMessage
-  if (!kind) return
+  const inner = viewOnceInner(msg.message)
+  if (!inner) return
+  const kind = getType({ message: inner })      // imageMessage / videoMessage / audioMessage
+  if (!kind || !inner[kind]?.mediaKey) return
   try {
     const buf = await downloadMediaMessage({ key: msg.key, message: inner }, 'buffer', {},
       { logger: sock.logger, reuploadRequest: sock.updateMediaMessage })
