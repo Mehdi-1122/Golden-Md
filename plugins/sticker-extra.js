@@ -3,10 +3,8 @@ import { spawn } from 'child_process'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
-import wsf from 'wa-sticker-formatter'
+import { stickerLib } from '../lib/stickerlib.js'
 
-const Sticker = wsf.Sticker || wsf.default?.Sticker
-const StickerTypes = wsf.StickerTypes || wsf.default?.StickerTypes
 
 const FONTS = [
   '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
@@ -53,6 +51,7 @@ export default [
         fontsize = Math.max(fontsize, 28)
         fs.writeFileSync(t, lines.join('\n'))
         await render(t, png, ff, fontsize)
+        const { Sticker, StickerTypes } = await stickerLib()
         const s = new Sticker(fs.readFileSync(png), { pack: 'Golden MD', author: msg.pushName || 'Golden MD', type: StickerTypes.FULL })
         await sock.sendMessage(from, { sticker: await s.toBuffer() }, { quoted: msg })
       } catch (e) { await reply('⚠️ ' + e.message) }

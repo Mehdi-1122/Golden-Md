@@ -1,10 +1,8 @@
 // Sticker tools (needs ffmpeg installed on the system)
 import { downloadMediaMessage } from '@whiskeysockets/baileys'
-import wsf from 'wa-sticker-formatter'
+import { stickerLib } from '../lib/stickerlib.js'
 import { getQuoted, getType } from '../lib/helpers.js'
 
-const Sticker = wsf.Sticker || wsf.default?.Sticker
-const StickerTypes = wsf.StickerTypes || wsf.default?.StickerTypes
 
 export default [
   { name: 'sticker', aliases: ['s', 'stiker'], category: 'media', desc: 'Image/video → sticker (apne naam ka)',
@@ -17,6 +15,7 @@ export default [
       const buf = await downloadMediaMessage(target, 'buffer', {}, { logger: sock.logger, reuploadRequest: sock.updateMediaMessage })
       // Public mein har banda apne naam ka sticker: pack = diya gaya text ya uska WhatsApp naam
       const pack = (text && text.trim()) || msg.pushName || process.env.STICKER_PACK || 'Golden MD'
+      const { Sticker, StickerTypes } = await stickerLib()
       const sticker = new Sticker(buf, {
         pack,
         author: msg.pushName || process.env.STICKER_AUTHOR || 'Golden MD',
@@ -29,6 +28,7 @@ export default [
       const q = getQuoted(msg)
       if (!q?.message?.stickerMessage) return reply('Sticker pe reply karein: .take MyPack')
       const buf = await downloadMediaMessage(q, 'buffer', {}, { logger: sock.logger, reuploadRequest: sock.updateMediaMessage })
+      const { Sticker, StickerTypes } = await stickerLib()
       const s = new Sticker(buf, { pack: text || 'Golden MD', author: process.env.STICKER_AUTHOR || 'Golden MD', type: StickerTypes.FULL })
       await sock.sendMessage(from, { sticker: await s.toBuffer() }, { quoted: msg })
     } },

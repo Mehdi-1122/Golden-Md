@@ -5,11 +5,9 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { downloadMediaMessage } from '@whiskeysockets/baileys'
-import wsf from 'wa-sticker-formatter'
+import { stickerLib } from '../lib/stickerlib.js'
 import { getQuoted, getType } from '../lib/helpers.js'
 
-const Sticker = wsf.Sticker || wsf.default?.Sticker
-const StickerTypes = wsf.StickerTypes || wsf.default?.StickerTypes
 
 const tmp = (e) => path.join(os.tmpdir(), `mp_${Date.now()}_${Math.random().toString(36).slice(2)}.${e}`)
 const clean = (...f) => f.forEach(x => { try { fs.unlinkSync(x) } catch {} })
@@ -24,7 +22,10 @@ const FONTS = [
 // ffmpeg filter mein Windows drive ka ":" escape karna padta hai
 const font = () => FONTS.find(f => { try { return fs.existsSync(f) } catch { return false } })?.replace(/^([A-Z]):/, '$1\\:')
 
-const sticker = async (buf, msg) => new Sticker(buf, { pack: process.env.STICKER_PACK || 'Golden MD', author: msg.pushName || 'Golden MD', type: StickerTypes.FULL, quality: 70 }).toBuffer()
+const sticker = async (buf, msg) => {
+  const { Sticker, StickerTypes } = await stickerLib()
+  return new Sticker(buf, { pack: process.env.STICKER_PACK || 'Golden MD', author: msg.pushName || 'Golden MD', type: StickerTypes.FULL, quality: 70 }).toBuffer()
+}
 
 // reply ki hui ya caption wali image ka buffer
 async function getImage (sock, msg) {
