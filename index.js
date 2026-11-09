@@ -23,9 +23,8 @@ if (process.env.NO_CONNECT) {
       console.log('\n🔗 Pairing code: ' + (code.match(/.{1,4}/g)?.join('-') || code) + '\n')
     },
     onOpen: () => {
-      // SESSION_ID poore account ki chaabi hai: hosting logs mein na jaye, sirf terminal par ek dafa
-      if (idShown || process.env.SESSION_ID) return
-      if (!process.stdout.isTTY && process.env.PRINT_SESSION_ID !== '1') return
+      // SESSION_ID poore account ki chaabi hai: sirf PRINT_SESSION_ID=1 par, aur ek dafa
+      if (idShown || process.env.SESSION_ID || process.env.PRINT_SESSION_ID !== '1') return
       idShown = true
       const id = makeId('./session')
       if (id) console.log('\n🔑 SESSION_ID (sambhaal lo — kisi bhi deploy ke SESSION_ID env mein daal sakte ho):\n' + id + '\n')

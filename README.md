@@ -139,9 +139,9 @@ SESSION_ID apni deploy par chalte hi website wala bot us number ke liye khud ban
 kyunki ek hi session do jagah nahi chal sakti.
 
 Chhoti ID ke muqable **lambi self-contained ID** bhi hai: single-mode (`npm start`)
-connect hote hi terminal par `GOLDEN~...` print karta hai (koi server nahi chahiye,
-par 2000+ characters lambi). Hosting ke logs mein ye print nahi hoti; zaroorat ho to
-`PRINT_SESSION_ID=1` lagao. Jo chahiye use karo.
+`PRINT_SESSION_ID=1` lagane par connect hote hi terminal mein `GOLDEN~...` print karta hai
+(koi server nahi chahiye, par 2000+ characters lambi). Security ke liye ye default band hai.
+Jo chahiye use karo.
 ⚠️ SESSION_ID aapke WhatsApp ki chaabi hai — kisi ko mat do.
 
 ## 9. 24/7 hosting

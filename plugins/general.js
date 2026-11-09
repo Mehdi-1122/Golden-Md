@@ -5,6 +5,19 @@ import { fmtUptime, num } from '../lib/helpers.js'
 const OWNER_NAME = '⎯꯭ͯ𓆩꯭᪴〬𝐌꯭𝗲꯭̽𝗵꯭͡𝗱𝆭𝝸𝆭-𝆭͢𓆪𝐤꯭𝆭𝝸𝝶̚𝗴᪳𓆪꯭᪴⟵'
 const CHANNEL = 'https://whatsapp.com/channel/0029VbE2Rbj0gcfMoVR1H642'
 
+// Menu ke sections: tarteeb aur emoji (nayi category khud aakhir mein aa jati hai)
+const CATS = { general: '🏠', ai: '🤖', download: '📥', media: '🎬', text: '✍️', tools: '🛠️', convert: '🔁', islamic: '🕌', group: '👥', safety: '🛡️', games: '🎮', fun: '😂', economy: '💰', owner: '👑' }
+
+// A-Z aur 0-9 ko bold unicode mein (sirf headings ke liye; commands saade rehte hain taake copy ho sakein)
+const bold = (s) => [...String(s).toUpperCase()].map(ch => {
+  const c = ch.charCodeAt(0)
+  if (c >= 65 && c <= 90) return String.fromCodePoint(0x1D5D4 + c - 65)
+  if (c >= 48 && c <= 57) return String.fromCodePoint(0x1D7EC + c - 48)
+  return ch
+}).join('')
+
+const pkNow = () => new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Karachi', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).format(new Date())
+
 export default [
   {
     name: 'menu', aliases: ['help', 'list', 'cmd'], category: 'general',
@@ -13,10 +26,21 @@ export default [
       const uniq = new Set([...commands.values()])
       const cats = {}
       for (const c of uniq) (cats[c.category || 'misc'] ||= []).push(c.name)
-      let t = `╭──── *${config.name}* ────\n│ Owner: ${OWNER_NAME}\n│ Prefix: ${config.prefix}  •  Mode: ${config.mode}\n│ Uptime: ${fmtUptime(config.start)}\n│ Total cmds: ${uniq.size}\n╰───────────────\n`
-      for (const [cat, list] of Object.entries(cats))
-        t += `\n*${cat.toUpperCase()}*\n` + list.map(n => `${config.prefix}${n}`).join('  ') + '\n'
-      t += `\n╭───────────────\n│ 📢 Channel:\n│ ${CHANNEL}\n│ 🤴 ${OWNER_NAME}\n╰───────────────`
+      let t = `╭━━━〔 👑 ${bold(config.name)} 👑 〕━━━⬣\n` +
+        `┃ 🤴 ${bold('Owner')}: ${OWNER_NAME}\n` +
+        `┃ ⚡ ${bold('Prefix')}: [ ${config.prefix} ]\n` +
+        `┃ 🌍 ${bold('Mode')}: ${config.mode}\n` +
+        `┃ ⏱️ ${bold('Uptime')}: ${fmtUptime(config.start)}\n` +
+        `┃ 🧩 ${bold('Commands')}: ${uniq.size}\n` +
+        `┃ 📅 ${pkNow()}\n` +
+        `╰━━━━━━━━━━━━━━━━⬣\n`
+      for (const cat of new Set([...Object.keys(CATS), ...Object.keys(cats)])) {
+        if (!cats[cat]) continue
+        t += `\n╭─❍ ${CATS[cat] || '✨'} ${bold(cat)} (${cats[cat].length})\n` +
+          cats[cat].map(n => `│ ✦ ${config.prefix}${n}`).join('\n') +
+          `\n╰────────────⬡\n`
+      }
+      t += `\n╭━━━〔 📢 ${bold('Channel')} 〕━━━⬣\n┃ ${CHANNEL}\n┃ 🤴 ${OWNER_NAME}\n╰━━━━━━━━━━━━━━━━⬣\n\n> ✨ ${bold(config.name)} — ${bold('Golden Power')} ✨`
       await reply(t.trim())
     }
   },
