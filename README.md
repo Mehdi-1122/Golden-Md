@@ -42,7 +42,9 @@ Options:
 - `admin: true`  → sirf group admin chalaye
 - `owner: true`  → sirf bot owner chalaye
 
-Naya command banane ke liye `plugins/` mein nayi file daal do, `npm start` dobara.
+Commands category ke folders mein hain: `plugins/group`, `download`, `media`, `sticker`, `ai`, `islamic`,
+`tools`, `text`, `games`, `fun`, `economy`, `general`, `owner`. Naya command banane ke liye sahi folder mein
+nayi file daal do, `npm start` dobara. Folder ke andar import `../../lib/...` se hota hai.
 
 ## 5. Khaas features
 - **`.gcss`** — kisi message/photo/video ko *reply* kar ke `.gcss` likho (ya text
