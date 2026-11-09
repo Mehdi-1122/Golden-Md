@@ -6,7 +6,7 @@ const OWNER_NAME = '⎯꯭ͯ𓆩꯭᪴〬𝐌꯭𝗲꯭̽𝗵꯭͡𝗱𝆭𝝸�
 const CHANNEL = 'https://whatsapp.com/channel/0029VbE2Rbj0gcfMoVR1H642'
 
 // Menu ke sections: tarteeb aur emoji (nayi category khud aakhir mein aa jati hai)
-const CATS = { group: ['👥', 'Group'], safety: ['🛡️', 'Group Security'], download: ['📥', 'Download'], media: ['🎬', 'Media'], sticker: ['🎨', 'Sticker'], ai: ['🤖', 'AI'], islamic: ['🕌', 'Islamic'], tools: ['🛠️', 'Tools'], text: ['✍️', 'Text Style'], convert: ['🔁', 'Converter'], games: ['🎮', 'Games'], fun: ['😂', 'Fun'], economy: ['💰', 'Economy'], general: ['🏠', 'General'], owner: ['👑', 'Owner'] }
+const CATS = { group: ['👥', 'Group'], safety: ['🛡️', 'Group Security'], download: ['📥', 'Download'], media: ['🎬', 'Media'], sticker: ['🎨', 'Sticker'], logo: ['🖌️', 'Logo Maker'], ai: ['🤖', 'AI'], islamic: ['🕌', 'Islamic'], tools: ['🛠️', 'Tools'], text: ['✍️', 'Text Style'], convert: ['🔁', 'Converter'], games: ['🎮', 'Games'], fun: ['😂', 'Fun'], economy: ['💰', 'Economy'], general: ['🏠', 'General'], owner: ['👑', 'Owner'] }
 
 // A-Z aur 0-9 ko bold unicode mein (sirf headings ke liye; commands saade rehte hain taake copy ho sakein)
 const bold = (s) => [...String(s).toUpperCase()].map(ch => {

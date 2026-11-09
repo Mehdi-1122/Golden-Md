@@ -122,6 +122,25 @@ export default [
         await reply(`✅ Bhej diya (~${mb}MB): ${v.title}`)
       } finally { clean(mp4) }
     } },
+  { name: 'spotify', aliases: ['spdl', 'sp'], category: 'download', desc: 'Spotify link ya naam se gaana',
+    async run ({ text, sock, from, msg, reply }) {
+      if (!text) return reply('.spotify <gaana ya spotify link>')
+      let q = text.trim()
+      if (/^https?:\/\/open\.spotify\.com\/(intl-[a-z]+\/)?track\/\S+$/i.test(q)) {
+        const r = await fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(q))
+        if (!r.ok) return reply('Spotify link se gaana nahi mila.')
+        q = (await r.json()).title
+      }
+      const v = (await yts(q)).videos?.[0]   // Spotify audio nahi deta, wahi gaana YouTube se
+      if (!v) return reply('Kuch nahi mila.')
+      await reply(`🎧 *${v.title}*\n⏱️ ${v.timestamp}\nDownload ho raha hai...`)
+      const webm = tmp('webm'), mp3 = tmp('mp3')
+      try {
+        await stream2file(ytdl(v.url, { filter: 'audioonly', quality: 'highestaudio' }), webm, MAX_AUDIO)
+        await toMp3(webm, mp3)
+        await sock.sendMessage(from, { audio: fs.readFileSync(mp3), mimetype: 'audio/mpeg', fileName: v.title + '.mp3' }, { quoted: msg })
+      } finally { clean(webm, mp3) }
+    } },
   { name: 'tiktok', aliases: ['tt', 'tiktokdl'], category: 'download', desc: 'TikTok bina watermark',
     async run ({ text, sock, from, msg, reply }) {
       if (!/tiktok\.com/.test(text || '')) return reply('.tiktok <tiktok link>')

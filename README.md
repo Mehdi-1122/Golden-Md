@@ -72,6 +72,20 @@ nayi file daal do, `npm start` dobara. Folder ke andar import `../../lib/...` se
 - **Media plus:** `.removebg` `.emojimix 😂+🔥` `.brat` `.blur` `.grayscale` `.circle` `.meme`
 - **Owner plus:** `.backup` `.stats` `.autostatus` `.autotyping`
 
+### Logo Maker
+`.logo` se saare styles dekho. Misal: `.goldlogo Mehdi`, `.neonlogo Mehdi`, `.firelogo Golden King` (20 styles, naam English harfon mein).
+Fonts `assets/fonts/` mein hain, har font ka license saath hai (SIL OFL).
+
+### Aur commands
+- **Group:** `.mute @user 10m` `.unmute` `.slowmode 30` `.antibot` `.groupstats`
+- **Download:** `.spotify` `.twitter` `.threads` `.mediafire` `.gdrive`
+- **Media:** `.tovideo` `.compress` `.crop square`
+- **AI:** `.tts` (voice note) `.trv en salam`
+- **Islamic:** `.randomayah` `.randomhadith` `.dailyislam` `.sehrialert Lahore` `.tasbih`
+- **Games:** `.hangman` `.flagquiz` `.wordguess` `.guesssong`
+- **Economy:** `.shop` `.buy` `.inventory` `.bank` `.deposit` `.withdraw` `.gamble` `.rank` `.toplevel` `.levelup`
+- **Tools:** `.news` `.imdb` `.time Dubai` `.whois google.com` `.pdfadd` `.pdf`
+
 ### Welcome / Goodbye (apni marzi ka)
 - `.setwelcome <message>` / `.setgoodbye <message>` — set karte hi ON ho jata hai
 - Message mein ye lafz khud badal jate hain: `@user` (tag), `{group}`, `{count}`, `{desc}`, `{date}`, `{time}`

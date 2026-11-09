@@ -1,4 +1,6 @@
 // Net tools — free APIs, koi key nahi (internet chahiye)
+import { translate } from '../../lib/translate.js'
+
 export default [
   { name: 'qr', category: 'tools', desc: 'Text → QR code',
     async run ({ text, sock, from, msg, reply }) {
@@ -20,9 +22,7 @@ export default [
       const lang = args.shift()
       const q = args.join(' ')
       if (!lang || !q) return reply('.trt <lang> <text>\nmisal: .trt ur Hello how are you')
-      const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=` + encodeURIComponent(q))
-      const j = await r.json()
-      await reply('🌐 ' + j[0].map(x => x[0]).join(''))
+      await reply('🌐 ' + await translate(q, lang))
     } },
   { name: 'define', aliases: ['dict', 'meaning'], category: 'tools', desc: 'Word ka matlab (English)',
     async run ({ text, reply }) {

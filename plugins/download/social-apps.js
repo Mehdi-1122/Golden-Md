@@ -7,6 +7,7 @@ import os from 'os'
 import path from 'path'
 
 const MAX = 60 * 1024 * 1024
+const DOC_MAX = 100 * 1024 * 1024
 
 // yt-dlp se file download; downloaded file ka path wapas
 const ytdlp = (url) => new Promise((res, rej) => {
@@ -44,6 +45,8 @@ const linkCmd = (name, aliases, re, label, desc) => ({
 export default [
   linkCmd('ig', ['insta', 'instagram', 'igdl', 'reel'], /^https?:\/\/([\w-]+\.)*instagram\.com\/\S*$/i, 'Instagram', 'Instagram reel/video'),
   linkCmd('fb', ['facebook', 'fbdl'], /^https?:\/\/([\w-]+\.)*(facebook\.com|fb\.watch)\/\S*$/i, 'Facebook', 'Facebook video'),
+  linkCmd('twitter', ['x', 'tw', 'twdl'], /^https?:\/\/([\w-]+\.)*(twitter\.com|x\.com)\/\S*$/i, 'Twitter/X', 'Twitter/X video'),
+  linkCmd('threads', ['thdl'], /^https?:\/\/([\w-]+\.)*threads\.(net|com)\/\S*$/i, 'Threads', 'Threads video'),
   { name: 'pin', aliases: ['pinterest'], category: 'download', desc: 'Pinterest pin (link) ya search',
     async run (ctx) {
       const t = (ctx.text || '').trim()
@@ -53,6 +56,37 @@ export default [
         return sendFile(ctx, await ytdlp(t), '📌 Pinterest')
       }
       await ctx.reply(`📌 *${t}* — Pinterest search:\nhttps://www.pinterest.com/search/pins/?q=${encodeURIComponent(t)}\n\nKoi pin pasand aaye to uska link: .pin <link>\nYa AI image: .img ${t}`)
+    } },
+  { name: 'mediafire', aliases: ['mf', 'mfdl'], category: 'download', desc: 'MediaFire file (100MB tak)',
+    async run ({ text, sock, from, msg, reply }) {
+      const url = (text || '').trim()
+      if (!/^https?:\/\/(www\.)?mediafire\.com\/\S+$/i.test(url)) return reply('.mediafire <mediafire link>')
+      const page = await (await fetch(url, { headers: { 'user-agent': 'Mozilla/5.0' } })).text()
+      const link = /href="(https:\/\/download\d*\.mediafire\.com\/[^"]+)"/.exec(page)?.[1]
+      if (!link) return reply('File nahi mili (link ghalat ya file delete ho chuki).')
+      const head = await fetch(link, { method: 'HEAD', headers: { 'user-agent': 'Mozilla/5.0' } })
+      const len = +head.headers.get('content-length') || 0
+      if (len > DOC_MAX) return reply(`⚠️ File ${(len / 1048576).toFixed(0)}MB ki hai, had 100MB hai.\n${url}`)
+      const fileName = decodeURIComponent(link.split('/').pop())
+      await reply(`⬇️ *${fileName}* bhej raha hoon...`)
+      await sock.sendMessage(from, { document: { url: link }, mimetype: head.headers.get('content-type') || 'application/octet-stream', fileName }, { quoted: msg })
+    } },
+  { name: 'gdrive', aliases: ['drive', 'gd'], category: 'download', desc: 'Google Drive file (100MB tak, public)',
+    async run ({ text, sock, from, msg, reply }) {
+      const t = (text || '').trim()
+      if (!/^https?:\/\/(drive|docs)\.google\.com\//i.test(t)) return reply('.gdrive <google drive link>')
+      const id = /\/d\/([\w-]{10,})/.exec(t)?.[1] || /[?&]id=([\w-]{10,})/.exec(t)?.[1]
+      if (!id) return reply('Is link mein file nahi mili.')
+      const link = `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`
+      const r = await fetch(link, { headers: { 'user-agent': 'Mozilla/5.0' } })
+      const type = r.headers.get('content-type') || ''
+      r.body?.cancel().catch(() => {})
+      if (!r.ok || type.includes('text/html')) return reply('⚠️ File public nahi hai, ya Drive ne roka hai. Link par "Anyone with the link" lagao.')
+      const len = +r.headers.get('content-length') || 0
+      if (len > DOC_MAX) return reply(`⚠️ File ${(len / 1048576).toFixed(0)}MB ki hai, had 100MB hai.`)
+      const fileName = /filename="([^"]+)"/.exec(r.headers.get('content-disposition') || '')?.[1] || 'drive-file'
+      await reply(`⬇️ *${fileName}* bhej raha hoon...`)
+      await sock.sendMessage(from, { document: { url: link }, mimetype: type || 'application/octet-stream', fileName }, { quoted: msg })
     } },
   { name: 'lyrics', aliases: ['lyric', 'lirik'], category: 'download', desc: 'Gaane ke lyrics',
     async run ({ text, reply }) {
