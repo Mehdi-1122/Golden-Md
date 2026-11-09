@@ -7,7 +7,7 @@ services:
     runtime: docker
     plan: starter            # free pe disk nahi milti; starter (paid) recommended
     envVars:
-      - key: PREFIX
+      - key: BOT_PREFIX
         value: "."
       - key: BOT_NAME
         value: "Golden MD"
