@@ -20,9 +20,44 @@ const TOPICS = [
   [/\b(hi|hello|hey|helo)\b/i, ['Hello ji! Itni der baad yaad aayi? 😏', 'Hi hi! Hasi aa gayi tumhein dekh kar 😂']],
   [/(\?|kya|kia|kyun|kyu|kab|kahan|kaise|kon|kaun)/i, ['Sawal acha hai, par mera dimagh abhi chai peene gaya hai ☕ thori der baad poochna 😅', 'Itna mushkil sawal? Main bot hoon, professor nahi 🤓😂']]
 ]
-const offlineReply = (text) => {
+const GENERIC = [
+  'Acha ji! Phir kya hua? Poori kahani sunao 👀',
+  'Yeh baat to chai ke saath honi chahiye thi ☕😄',
+  'Main sun raha hoon, tum bolte raho 😌',
+  'Tumhari baat mein dum hai, bas samajh nahi aayi 😂',
+  'Waah! Yeh line to diary mein likhni chahiye 📖😄',
+  'Haan haan, bilkul... waise kis baare mein baat ho rahi thi? 🤔😂',
+  'Is baat par to ek samosa banta hai 🥟😎',
+  'Dil se bola ya copy paste kiya? 😏',
+  'Baat to sahi hai, par maanega kaun? 😅',
+  'Thora aur khul kar batao, main bot hoon par jasoos bhi hoon 🕵️😂',
+  'Hmm... mera processor soch mein par gaya hai 🤖💭',
+  'Yeh sun kar meri battery 2% barh gayi 🔋😄'
+]
+const EMOJI_REPLIES = [
+  'Sirf emoji? Lafzon ki kami chal rahi hai kya 😂',
+  'Is emoji ka matlab samjhane ke liye alag se fee lagegi 😏',
+  'Muskurahat achi hai, ab baat bhi kar lo 😄',
+  'Emoji se kaam chala rahe ho, kanjoos kahin ke 😜',
+  'Main bhi jawab mein emoji bhej doon? 🙃',
+  'Tumhara yeh emoji mere dil par laga 💘😂'
+]
+const EMOJI_ONLY = /^(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|[‍️\s])+$/u
+
+// har chat mein pichla offline jawab dobara na aaye
+const lastOffline = new Map()
+const pickNew = (chat, list) => {
+  const fresh = list.filter(x => x !== lastOffline.get(chat))
+  const ans = pick(fresh.length ? fresh : list)
+  if (lastOffline.size > 5000) lastOffline.clear()
+  lastOffline.set(chat, ans)
+  return ans
+}
+
+const offlineReply = (chat, text) => {
+  if (EMOJI_ONLY.test(text)) return pickNew(chat, EMOJI_REPLIES)
   const t = TOPICS.find(([re]) => re.test(text))
-  return t ? pick(t[1]) : `"${text.slice(0, 30)}"? Baat gehri hai, samajh sirf WiFi aane par aayegi 📶😂`
+  return pickNew(chat, t ? t[1] : GENERIC)
 }
 
 async function viaClaude (messages) {
@@ -39,13 +74,13 @@ async function viaClaude (messages) {
   } catch { return null }
 }
 
-// free service kabhi atak jati hai: 2 koshishen, har ek 20 second
+// free service aksar atak jati hai: 3 koshishen, har ek 15 second
 async function viaFree (messages) {
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 3; i++) {
     try {
       const r = await fetch('https://text.pollinations.ai/openai', {
         method: 'POST',
-        signal: AbortSignal.timeout(20000),
+        signal: AbortSignal.timeout(15000),
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ model: 'openai', private: true, messages: [{ role: 'system', content: SYSTEM }, ...messages] })
       })
@@ -66,7 +101,10 @@ async function funnyReply (chat, text) {
   const past = history.get(chat) || []
   const messages = [...past, { role: 'user', content: text }]
   const ans = (await viaClaude(messages)) || (await viaFree(messages))
-  if (!ans) return offlineReply(text)
+  if (!ans) {
+    console.error('chatbot: AI se jawab nahi mila, offline jawab bheja')
+    return offlineReply(chat, text)
+  }
   if (history.size > 500) history.clear()
   history.set(chat, [...messages, { role: 'assistant', content: ans }].slice(-8))
   return ans

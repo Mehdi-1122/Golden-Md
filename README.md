@@ -49,7 +49,7 @@ Apna number country code ke saath likho (`923001234567` ki jagah), phir poora pa
 termux-wake-lock
 pkg update -y &&
 pkg install -y git nodejs-lts ffmpeg python &&
-(pip install yt-dlp || true) &&
+(pip install -U "yt-dlp[default]" || true) &&
 cd ~ &&
 git clone https://github.com/Mehdi-1122/Golden-Md.git &&
 cd Golden-Md &&
@@ -66,7 +66,7 @@ Agli dafa chalane ke liye: `cd ~/Golden-Md && npm start`
 
 ## 💻 PC ya VPS par chalao
 
-Node.js 20+ aur ffmpeg zaroori hain. `.ig`, `.fb`, `.twitter` waghera ke liye [yt-dlp](https://github.com/yt-dlp/yt-dlp) bhi.
+Node.js 20+ aur ffmpeg zaroori hain. YouTube (`.play`, `.vid`, `.ytmp3`, `.ytmp4`), `.ig`, `.fb`, `.twitter` waghera ke liye [yt-dlp](https://github.com/yt-dlp/yt-dlp) bhi.
 
 ```bash
 git clone https://github.com/Mehdi-1122/Golden-Md.git
