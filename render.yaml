@@ -5,6 +5,7 @@ services:
   - type: web
     name: golden-md
     runtime: docker
+    autoDeploy: false        # Deploy button walon par har push se naya build na chale
     plan: starter            # free pe disk nahi milti; starter (paid) recommended
     envVars:
       - key: BOT_PREFIX

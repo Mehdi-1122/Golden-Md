@@ -1,0 +1,25 @@
+{
+  "name": "Golden MD",
+  "description": "WhatsApp multi-device bot with 292 commands",
+  "repository": "https://github.com/Mehdi-1122/Golden-Md",
+  "keywords": ["whatsapp", "bot", "baileys"],
+  "stack": "container",
+  "env": {
+    "OWNER_NUMBER": {
+      "description": "Owner ka number, country code ke saath (misal 923001234567)"
+    },
+    "PAIRING_NUMBER": {
+      "description": "Bot ka number. Pairing code app ke Logs mein aayega.",
+      "required": false
+    },
+    "SESSION_ID": {
+      "description": "Pehle se bani session (GOLDEN~ ya GMD~). Restart par dobara pair nahi karna parega.",
+      "required": false
+    },
+    "BOT_PREFIX": { "description": "Command ka nishan", "value": ".", "required": false },
+    "MODE": { "description": "public ya private", "value": "public", "required": false }
+  },
+  "formation": {
+    "worker": { "quantity": 1, "size": "basic" }
+  }
+}
