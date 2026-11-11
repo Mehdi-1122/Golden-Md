@@ -19,7 +19,7 @@ export default [
       const win = r[0] === r[1] && r[1] === r[2]
       await reply(`🎰 [ ${r.join(' | ')} ]\n\n${win ? '💰 JACKPOT!' : 'Phir koshish karo 🎲'}`)
     } },
-  { name: 'lottery', aliases: ['lucky'], category: 'games', desc: 'Lucky number',
+  { name: 'lottery', aliases: ['luckynumber'], category: 'games', desc: 'Lucky number',
     async run ({ reply }) { await reply('🎟️ Tumhara lucky number: ' + (1 + Math.floor(Math.random() * 100))) } },
   { name: 'pick', aliases: ['choose'], category: 'games', desc: 'Options mein se ek chuno',
     async run ({ text, reply }) {

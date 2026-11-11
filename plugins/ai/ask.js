@@ -1,6 +1,6 @@
 // .ai — seedha sawal jawab (Claude API)
 export default [
-  { name: 'ai', aliases: ['gpt', 'ask'], category: 'ai', desc: 'AI se sawal',
+  { name: 'ai', aliases: ['ask'], category: 'ai', desc: 'AI se sawal',
     async run ({ text, reply }) {
       if (!text) return reply('.ai <sawal>')
       if (!process.env.ANTHROPIC_API_KEY) return reply('⚠️ .env mein ANTHROPIC_API_KEY daalein.')

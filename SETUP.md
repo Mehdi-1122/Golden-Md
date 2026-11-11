@@ -26,6 +26,27 @@ npm start
 
 `PAIRING_NUMBER` khali ho to terminal par QR code aata hai, likha ho to pairing code.
 
+## 📱 Termux par (Android)
+
+```bash
+pkg update -y && pkg upgrade -y
+pkg install -y nodejs-lts git ffmpeg
+# downloads (.play .song .video) chahiyen to:  pkg install -y python && pip install -U yt-dlp
+git clone https://github.com/Mehdi-1122/Golden-Md.git
+cd Golden-Md
+npm install
+cp .env.example .env
+nano .env        # OWNER_NUMBER aur (AI ke liye) ANTHROPIC_API_KEY bharo — save: Ctrl+X, Y, Enter
+node index.js    # QR/pairing se link karo
+```
+
+Mini-bot website Termux par chalani ho to `npm run web` likho.
+
+> **Repo private hai?** `git clone` login maangega. GitHub se ek **Personal Access Token** banao aur aise clone karo:
+> `git clone https://<TOKEN>@github.com/Mehdi-1122/Golden-Md.git`
+
+> Phone band/screen off par bot ruk sakta hai. Chalu rakhne ke liye Termux mein `termux-wake-lock` chalao, aur battery settings mein Termux ko "no restrictions" do.
+
 <details>
 <summary><b>🌐 Mini-bot website (log khud connect karein)</b></summary>
 
@@ -35,7 +56,7 @@ npm start
 npm run web     # http://localhost:3000
 ```
 
-User apna number daalta hai, pairing code se link karta hai, aur us ke number par bot chal jata hai. `PUBLIC_URL` set karne par use chhoti `GMD~` SESSION_ID bhi milti hai jo wo apni deploy par laga sakta hai.
+User apna number daalta hai, phir **QR code ya pairing code** mein se jo chahe chun kar link karta hai, aur us ke number par bot chal jata hai. `PUBLIC_URL` set karne par use chhoti `GMD~` SESSION_ID bhi milti hai jo wo apni deploy par laga sakta hai.
 
 > ⚠️ Is mode mein sab users ki WhatsApp sessions aap ke server par hoti hain. Sirf bharosemand server par chalao.
 
@@ -55,7 +76,12 @@ User apna number daalta hai, pairing code se link karta hai, aur us ke number pa
 | `BOT_NAME` | Bot ka naam |
 | `MODE` | `public` ya `private` |
 | `ANTHROPIC_API_KEY` | AI commands ke liye (chatbot bina key bhi chalta hai) |
-| `AI_MODEL` | AI model ka naam |
+| `AI_MODEL` | AI model ka naam (default `claude-haiku-5-5`) |
+| `CHATBOT_MODEL` | Sirf chatbot ka model (khali = `claude-opus-5-5`; sasta: `claude-sonnet-5-5` / `claude-haiku-5-5`) |
+| `CHATBOT_EFFORT` | Chatbot kitna soch kar jawab de: `low` / `medium` (default) / `high` |
+| `CHATBOT_WEB` | `0` = chatbot internet search na kare |
+| `OPENAI_API_KEY` / `GEMINI_API_KEY` / `MISTRAL_API_KEY` | `.gpt` / `.gemini` / `.mistral` ke liye (khali = free AI) |
+| `SELF_CHAT_PN` | `1` = "Message yourself" purane number wale address se (agar anti-delete/status messages na khulein) |
 | `CRICKET_API_KEY` | `.cricket` ke liye |
 | `REMOVEBG_API_KEY` | `.removebg` ke liye |
 | `YTDLP` | yt-dlp ka poora path, agar PATH par na ho |

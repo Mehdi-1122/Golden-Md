@@ -5,6 +5,7 @@ import path from 'path'
 import http from 'http'
 import crypto from 'crypto'
 import { fileURLToPath } from 'url'
+import QRCode from 'qrcode'
 import { startSession, stopSession, sessions } from './lib/session.js'
 import { num } from './lib/helpers.js'
 
@@ -19,6 +20,7 @@ const SENT_FILE = '.sid-sent'     // SESSION_ID WhatsApp par ja chuki
 const MOVED_FILE = '.moved'       // user ne apni deploy par chala li, yahan resume nahi karna
 
 const pairTokens = new Map()      // number -> { token, exp } (sirf code lene wale browser ke paas)
+const qrLatest = new Map()        // number -> taaza QR string (QR har ~20s badalta hai)
 const pending = new Set()         // jin numbers ki pairing chal rahi hai
 const MAX_PENDING = 20
 const PAIR_WINDOW = 180000        // pairing code ki taqreeban umar
@@ -128,6 +130,41 @@ const server = http.createServer(async (req, res) => {
     return
   }
 
+  // QR: number -> QR image (user scan kare). Pairing jaisa hi, bas code ki jagah QR.
+  if (req.method === 'POST' && url.pathname === '/qr') {
+    if (rateLimited(req)) return json(res, 429, { error: 'Bohot zyada koshishen. 10 minute baad dobara karein.' })
+    let body = ''
+    req.on('data', c => { body += c; if (body.length > 2048) req.destroy() })
+    req.on('end', async () => {
+      let number = ''
+      let started = false
+      try {
+        number = String(JSON.parse(body || '{}').number || '').replace(/\D/g, '')
+        if (number.length < 10 || number.length > 15) return json(res, 400, { error: 'Sahi number dein (country code ke saath).' })
+        const dir = path.join(SESS, number)
+        if (sessions.get(dir)?.authState?.creds?.account) return json(res, 200, { already: true })
+        if (pending.has(number)) return json(res, 429, { error: 'Is number ki koshish pehle hi chal rahi hai. 3 minute baad dobara karein.' })
+        if (pending.size >= MAX_PENDING) return json(res, 503, { error: 'Server busy hai, thori der baad koshish karein.' })
+        pending.add(number); started = true
+        setTimeout(() => { pending.delete(number); qrLatest.delete(number) }, PAIR_WINDOW)
+        stopSession(dir, { wipe: true })
+        const qr = await new Promise((resolve, reject) => {
+          const t = setTimeout(() => reject(new Error('QR nahi bana — dobara koshish karein.')), 30000)
+          startSession({ dir, owner: number, ...callbacks(dir), onQR: (q) => { qrLatest.set(number, q); clearTimeout(t); resolve(q) } })
+            .catch(reject)
+        })
+        const token = crypto.randomBytes(16).toString('hex')
+        if (pairTokens.size > 1000) pairTokens.clear()
+        pairTokens.set(number, { token, exp: Date.now() + 3600000 })
+        json(res, 200, { qr: await QRCode.toDataURL(qr, { margin: 1, width: 300 }), token })
+      } catch (e) {
+        if (started) { pending.delete(number); qrLatest.delete(number); stopSession(path.join(SESS, number), { wipe: true }) }
+        json(res, 500, { error: e.message })
+      }
+    })
+    return
+  }
+
   // Short-id se creds (deploy par bot yahan se laata hai). id 128-bit secret hai.
   if (req.method === 'GET' && url.pathname.startsWith('/session/')) {
     const sid = url.pathname.split('/').pop()
@@ -144,7 +181,11 @@ const server = http.createServer(async (req, res) => {
     const dir = path.join(SESS, n)
     const connected = !!sessions.get(dir)?.gmdOpen
     const sid = connected ? readSid(dir) : null
-    return json(res, 200, { connected, sessionId: sid ? `GMD~${publicHost(req)}~${sid}` : null })
+    if (connected) qrLatest.delete(n)
+    // QR mode: jab tak connect na ho, taaza QR image bhejte raho (har ~20s badalta hai)
+    const qrStr = !connected && qrLatest.get(n)
+    const qr = qrStr ? await QRCode.toDataURL(qrStr, { margin: 1, width: 300 }) : null
+    return json(res, 200, { connected, qr, sessionId: sid ? `GMD~${publicHost(req)}~${sid}` : null })
   }
 
   // Static: pairing page

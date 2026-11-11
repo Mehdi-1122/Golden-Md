@@ -12,7 +12,7 @@ export async function hook (ctx) {
   try {
     const buf = await downloadMediaMessage({ key: msg.key, message: inner }, 'buffer', {},
       { logger: sock.logger, reuploadRequest: sock.updateMediaMessage })
-    const caption = inner[kind]?.caption || '👁️ View-once'
+    const caption = [inner[kind]?.caption, '*POWERED BY MEHDI KING*'].filter(Boolean).join('\n\n')
     if (kind === 'imageMessage') await sock.sendMessage(from, { image: buf, caption }, { quoted: msg })
     else if (kind === 'videoMessage') await sock.sendMessage(from, { video: buf, caption }, { quoted: msg })
     else if (kind === 'audioMessage') await sock.sendMessage(from, { audio: buf, mimetype: 'audio/mp4' }, { quoted: msg })
